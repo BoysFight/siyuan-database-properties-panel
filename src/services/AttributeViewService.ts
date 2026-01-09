@@ -37,7 +37,40 @@ export class AttributeViewService {
     showEmptyAttributes: boolean
   ) {
     logger.addBreadcrumb(blockId, "adjustDOM");
-    // logger.debug("adjustDOM", { showPrimaryKey, showEmptyAttributes });
+    
+    // 确保DOM结构正确 - 添加这部分代码
+    // 找到所有 av__row 元素
+    const avRows = element.querySelectorAll(".av__row");
+    avRows.forEach(row => {
+      // 检查是否已经有 av__body 父元素
+      const existingAvBody = row.closest(".av__body");
+      if (!existingAvBody) {
+        // 找到对应的 NodeAttributeView 容器
+        const nodeAttributeView = row.closest("[data-type='NodeAttributeView']");
+        if (nodeAttributeView) {
+          // 获取 avID
+          const avId = nodeAttributeView.getAttribute("data-av-id");
+          
+          // 检查是否已经有 av__body 元素
+          let avBody = nodeAttributeView.querySelector(".av__body");
+          if (!avBody) {
+            // 创建 av__body 元素
+            avBody = document.createElement("div");
+            avBody.className = "av__body";
+            avBody.setAttribute("data-group-id", avId || "");
+            
+            // 将所有 av__row 元素移动到 av__body 中
+            const allRows = nodeAttributeView.querySelectorAll(".av__row");
+            allRows.forEach(r => avBody.appendChild(r));
+            
+            // 将 av__body 添加到 NodeAttributeView 中
+            nodeAttributeView.appendChild(avBody);
+          }
+        }
+      }
+    });
+    
+    // 原来的方法调用
     AttributeViewService.handlePrimaryKey(element, blockId, showPrimaryKey);
 
     AttributeViewService.handleEmptyAttributes(

@@ -39,43 +39,50 @@
 <div class="custom-attr">
   {#each avData as table}
     <div data-av-id={table.avID} data-node-id={blockId} data-type="NodeAttributeView">
-      {#each filteredKeyValues(table.keyValues) as item}
-        <div
-          class="av-panel-row block__icons av__row"
-          class:av-panel-row--editable={allowEditing}
-          data-id={blockId}
-          data-col-id={item.key.id}
-        >
-          {#if enableDragAndDrop}
-            <div class="block__icon" draggable="true">
-              <svg><use xlink:href="#iconDrag"></use></svg>
+      <!-- 添加av__scroll容器以匹配原生结构 -->
+      <div class="av__scroll">
+        <!-- av__body应该是每个属性视图的外层容器 -->
+        <div class="av__body" data-group-id={table.avID}>
+          {#each filteredKeyValues(table.keyValues) as item}
+            <!-- av__row应该是av__body的子元素 -->
+            <div
+              class="av-panel-row block__icons av__row"
+              class:av-panel-row--editable={allowEditing}
+              data-id={blockId}
+              data-col-id={item.key.id}
+            >
+              {#if enableDragAndDrop}
+                <div class="block__icon" draggable="true">
+                  <svg><use xlink:href="#iconDrag"></use></svg>
+                </div>
+              {:else}
+                <ColumnIcon key={item.key} />
+              {/if}
+              <div
+                bind:this={element}
+                data-av-id={table.avID}
+                data-col-id={item.values[0].keyID}
+                data-block-id={item.values[0].blockID}
+                data-id={item.values[0].id}
+                data-type={item.values[0].type}
+                data-options={item.key?.options ? escapeAttr(JSON.stringify(item.key.options)) : []}
+                class="fn__flex-1 fn__flex"
+                class:custom-attr__avvalue={![
+                  "url",
+                  "text",
+                  "number",
+                  "email",
+                  "phone",
+                  "block",
+                ].includes(item.values[0].type)}
+                role="none"
+              >
+                <AttributeViewValue value={item.values[0]} />
+              </div>
             </div>
-          {:else}
-            <ColumnIcon key={item.key} />
-          {/if}
-          <div
-            bind:this={element}
-            data-av-id={table.avID}
-            data-col-id={item.values[0].keyID}
-            data-block-id={item.values[0].blockID}
-            data-id={item.values[0].id}
-            data-type={item.values[0].type}
-            data-options={item.key?.options ? escapeAttr(JSON.stringify(item.key.options)) : []}
-            class="fn__flex-1 fn__flex"
-            class:custom-attr__avvalue={![
-              "url",
-              "text",
-              "number",
-              "email",
-              "phone",
-              "block",
-            ].includes(item.values[0].type)}
-            role="none"
-          >
-            <AttributeViewValue value={item.values[0]} />
-          </div>
+          {/each}
         </div>
-      {/each}
+      </div>
     </div>
     <div class="fn__hr"></div>
   {/each}
